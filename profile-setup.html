@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9jaMeet - Profile Setup</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1 style="color: aliceblue;">Set Up Your Profile</h1>
+    <form id="profileForm">
+      <input type="text" id="bio" placeholder="Short bio" required />
+      <select id="gender" required>
+        <option value="">Select gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="prefer-not-say">Prefer not to say</option>
+      </select>
+      <label>
+        <input type="checkbox" id="visibility" />
+        Make my profile public
+      </label>
+      <button type="submit">Save Profile</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2iRQOv6nNQGOxLtJsN0Uget4CBH9doCo",
+      authDomain: "meet9ja-a3cc.firebaseapp.com",
+      projectId: "meet9ja-a3cc",
+      storageBucket: "meet9ja-a3cc.appspot.com",
+      messagingSenderId: "1065158529421",
+      appId: "1:1065158529421:web:0d92fd069897568531edc4",
+      measurementId: "G-W6HBXN8NE4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const form = document.getElementById('profileForm');
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const bio = document.getElementById("bio").value.trim();
+        const gender = document.getElementById("gender").value;
+        const visibility = document.getElementById("visibility").checked;
+
+        try {
+          await setDoc(doc(db, "profiles", user.uid), {
+            bio,
+            gender,
+            visibility,
+            createdAt: new Date()
+          });
+          alert("✅ Profile saved!");
+          window.location.href = "dashboard.html";  // ✅ Redirect to dashboard
+        } catch (err) {
+          console.error("❌ Profile save error:", err);
+          alert("Failed to save profile.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
